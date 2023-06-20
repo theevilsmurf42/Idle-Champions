@@ -24,7 +24,7 @@ class IC_ServerCalls_Class
     userDetails := ""
     activePatronID := 0
     dummyData := ""
-    webRoot := "https://ps23.idlechampions.com/~idledragons/"
+    webRoot := "https://ps20.idlechampions.com/~idledragons/"
     timeoutVal := 60000
     playServerExcludes := "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
 

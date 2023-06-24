@@ -1,9 +1,9 @@
 {
 	"CrusadersGameDataSet":{
-		"moduleAddress":4835272,
+		"moduleAddress":4824176,
 		"moduleOffset":[
-			64,
-			3184
+			56,
+			3664
 		],
 		"staticOffset":""
 	},
@@ -29,11 +29,13 @@
 		"staticOffset":2688
 	},
 	"IdleGameManager":{
-		"moduleAddress":4807312,
+		"moduleAddress":4823856,
 		"moduleOffset":[
-			3248
+			3376
 		],
 		"staticOffset":""
 	},
-	"is64":1
+	"is64":1,
+	"Platform":"Steam",
+	"Version":521
 }

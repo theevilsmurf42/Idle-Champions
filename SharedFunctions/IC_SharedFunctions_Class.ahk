@@ -33,6 +33,8 @@ class IC_SharedData_Class
     BadAutoProgress := 0
     PreviousStacksFromOffline := 0
     TargetStacks := 0
+    ShiniesByChamp := {}
+    ShiniesByChampJson := ""
 
     Close()
     {
@@ -85,6 +87,9 @@ class IC_SharedFunctions_Class
     ModronResetZone := 0
     CurrentZone := ""
     Settings := ""
+    TotalGems := 0
+    TotalSilverChests := 0
+    TotalGoldChests := 0
 
     __new()
     {
@@ -98,14 +103,24 @@ class IC_SharedFunctions_Class
     ; returns this class's version information (string)
     GetVersion()
     {
-        return "v2.6.3, 2022-09-05"
+        return "v2.7.0, 2023-04-8"
     }
 
     ;Gets data from JSON file
     LoadObjectFromJSON( FileName )
     {
         FileRead, oData, %FileName%
-        return JSON.parse( oData )
+        data := "" 
+        try
+        {
+            data := JSON.parse( oData )
+        }
+        catch err
+        {
+            err.Message := err.Message . "`nFile:`t" . FileName
+            throw err
+        }
+        return data
     }
 
     ;Writes beautified json (object) to a file (FileName)
@@ -135,6 +150,24 @@ class IC_SharedFunctions_Class
             }
         }
         return false
+    }
+
+    ; Parses a response from an open chests call to tally shiny counts by champ and slot. Returns count of shinies
+    ParseChestResults( chestResults )
+    {
+        shinies := 0
+        for k, v in chestResults.loot_details
+        {
+            if v.gilded
+            {
+                shinies += 1
+                g_SharedData.ShiniesByChamp[v.hero_id] := (g_SharedData.ShiniesByChamp[v.hero_id] != "" ? g_SharedData.ShiniesByChamp[v.hero_id] : {})
+                g_SharedData.ShiniesByChamp[v.hero_id][v.slot_id] := ((g_SharedData.ShiniesByChamp[v.hero_id][v.slot_id] != "") ? (g_SharedData.ShiniesByChamp[v.hero_id][v.slot_id] + 1) : 1)
+                ;string := "New shiny! Champ ID: " . v.hero_id . " (Slot " . v.slot_id . ")`n"
+            }
+        }
+        g_SharedData.ShiniesByChampJson := JSON.Stringify(g_SharedData.ShiniesByChamp)
+        return shinies
     }
 
     ;====================================================
@@ -438,8 +471,8 @@ class IC_SharedFunctions_Class
         ElapsedTime := 0
         timeScale := this.Memory.ReadTimeScaleMultiplier()
         timeScale := timeScale < 1 ? 1 : timeScale ; time scale should never be less than 1
-        timeout := 60000 ; 60s seconds ( previously / timescale (6s at 10x) )
-        estimate := (60000 / timeScale) ; no buffer: 60s / timescale to show in LoopString
+        timeout := 30000 ; 60s seconds ( previously / timescale (6s at 10x) )
+        estimate := (timeout / timeScale) ; no buffer: 60s / timescale to show in LoopString
         ; Loop escape conditions:
         ;   does full timeout duration
         ;   past highest accepted dashwait triggering area
@@ -450,11 +483,14 @@ class IC_SharedFunctions_Class
             this.SetFormation()
             ElapsedTime := A_TickCount - StartTime
             g_SharedData.LoopString := "Dash Wait: " . ElapsedTime . " / " . estimate
+            percentageReducedSleep := Max(Floor((1-(ElapsedTime/estimate))*estimate/10), 15)
+            Sleep, %percentageReducedSleep%
         }
         g_PreviousZoneStartTime := A_TickCount
         return
     }
 
+    ; Template function for whether determining if to Dash Wait. Default is Yes if shandie is in the formation.
     ShouldDashWait()
     {
         return this.IsChampInFormation( 47, this.Memory.GetCurrentFormation() )
@@ -511,12 +547,21 @@ class IC_SharedFunctions_Class
     }
 
     ;A test if stuck on current area. After 35s, toggles autoprogress every 5s. After 45s, attempts falling back up to 2 times. After 65s, restarts level.
-    CheckifStuck()
+    CheckifStuck(isStuck := false)
     {
         static lastCheck := 0
         static fallBackTries := 0
         ;TODO: add better code in case a modron reset happens without being detected. might mean updating other functions.
         dtCurrentZoneTime := Round((A_TickCount - g_PreviousZoneStartTime) / 1000, 2)
+        if (isStuck)
+        {
+            this.RestartAdventure( "Game is stuck z[" . this.Memory.ReadCurrentZone() . "]")
+            this.SafetyCheck()
+            g_PreviousZoneStartTime := A_TickCount
+            lastCheck := 0
+            fallBackTries := 0
+            return true
+        }
         if (dtCurrentZoneTime > 35 AND dtCurrentZoneTime <= 45 AND dtCurrentZoneTime - lastCheck > 5) ; first check - ensuring autoprogress enabled
         {
             this.ToggleAutoProgress(1, true)
@@ -538,7 +583,7 @@ class IC_SharedFunctions_Class
         }
         if (dtCurrentZoneTime > 65)
         {
-            this.RestartAdventure( "Game is stuck" )
+            this.RestartAdventure( "Game is stuck z[" . this.Memory.ReadCurrentZone() . "]" )
             this.SafetyCheck()
             g_PreviousZoneStartTime := A_TickCount
             lastCheck := 0
@@ -598,18 +643,30 @@ class IC_SharedFunctions_Class
         {
             this.DirectedInput(,,["{e}"]*)
             g_SharedData.SwapsMadeThisRun++
+            return
         }
         ;check to unbench briv
-        else if (brivBenched AND this.UnBenchBrivConditions(this.Settings))
+        if (brivBenched AND this.UnBenchBrivConditions(this.Settings))
         {
             this.DirectedInput(,,["{q}"]*)
             g_SharedData.SwapsMadeThisRun++
+            return
+        }
+        isFormation2 := this.IsCurrentFormation(this.Memory.GetFormationByFavorite(2))
+        isWalkZone := this.Settings["PreferredBrivJumpZones"][Mod( this.Memory.ReadCurrentZone(), 50) == 0 ? 50 : Mod( this.Memory.ReadCurrentZone(), 50)] == 0
+        ; check to swap briv from favorite 2 to favorite 3 (W to E)
+        if (!brivBenched AND isFormation2 AND isWalkZone)
+        {
+            this.DirectedInput(,,["{e}"]*)
+            g_SharedData.SwapsMadeThisRun++
+            return
         }
         ; check to swap briv from favorite 2 to favorite 1 (W to Q)
-        else if (!brivBenched AND this.IsCurrentFormation(this.Memory.GetFormationByFavorite(2)))
+        if (!brivBenched AND isFormation2 AND !isWalkZone)
         {
             this.DirectedInput(,,["{q}"]*)
             g_SharedData.SwapsMadeThisRun++
+            return
         }
     }
 
@@ -687,47 +744,31 @@ class IC_SharedFunctions_Class
     ; Attemps to open IC. Game should be closed before running this function or multiple copies could open.
     OpenIC()
     {
-        timeoutVal := 32000
+        timeoutVal := 32000 + 90000 ; 32s + waitforgameready timeout
         loadingDone := false
         g_SharedData.LoopString := "Starting Game"
-        waitForProcessTime := g_UserSettings[ "WaitForProcessTime" ]
         WinGetActiveTitle, savedActive
         this.SavedActiveWindow := savedActive
+        StartTime := A_TickCount
         while ( !loadingZone AND ElapsedTime < timeoutVal )
         {
             this.Hwnd := 0
-            this.PID := 0
-            while (!this.PID AND ElapsedTime < timeoutVal )
-            {
-                StartTime := A_TickCount
-                ElapsedTime := 0
-                g_SharedData.LoopString := "Opening IC.."
-                programLoc := g_UserSettings[ "InstallPath" ]
-                Run, %programLoc%
-                Sleep, %waitForProcessTime%
-                while(ElapsedTime < 10000 AND !this.PID )
-                {
-                    ElapsedTime := A_TickCount - StartTime
-                    existingProcessID := g_userSettings[ "ExeName"]
-                    Process, Exist, %existingProcessID%
-                    this.PID := ErrorLevel
-                }
-            }
-            ; Process exists, wait for the window:
-            while(!(this.Hwnd := WinExist( "ahk_exe " . g_userSettings[ "ExeName"] )) AND ElapsedTime < timeoutVal)
-            {
-                WinGetActiveTitle, savedActive
-                this.SavedActiveWindow := savedActive
-                ElapsedTime := A_TickCount - StartTime
-            }
+            ElapsedTime := A_TickCount - StartTime
             if(ElapsedTime < timeoutVal)
-            {
-                this.ActivateLastWindow()
-                Process, Priority, % this.PID, High
-                this.Memory.OpenProcessReader()
+                this.OpenProcessAndSetPID(timeoutVal - ElapsedTime)
+            ElapsedTime := A_TickCount - StartTime
+            if(ElapsedTime < timeoutVal)
+                this.SetLastActiveWindowWhileWaingForGameExe(timeoutVal - ElapsedTime)
+            Process, Priority, % this.PID, High
+            this.ActivateLastWindow()
+            this.Memory.OpenProcessReader()
+            ElapsedTime := A_TickCount - StartTime
+            if(ElapsedTime < timeoutVal)
                 loadingZone := this.WaitForGameReady()
+            if(loadingZone)
                 this.ResetServerCall()
-            }
+            Sleep, 62
+            ElapsedTime := A_TickCount - StartTime
         }
         if(ElapsedTime >= timeoutVal)
             return -1 ; took too long to open
@@ -735,7 +776,58 @@ class IC_SharedFunctions_Class
             return 0
     }
 
-    ActivateLastWindow() { ; Just for prototyping purposes
+    ; Runs the process and set this.PID once it is found running. 
+    OpenProcessAndSetPID(timeoutLeft := 32000)
+    {
+        this.PID := 0
+        processWaitingTimeout := 10000 ;10s
+        waitForProcessTime := g_UserSettings[ "WaitForProcessTime" ]
+        ElapsedTime := 0
+        StartTime := A_TickCount
+        while (!this.PID AND ElapsedTime < timeoutLeft )
+        {
+            g_SharedData.LoopString := "Opening IC.."
+            programLoc := g_UserSettings[ "InstallPath" ]
+            Run, %programLoc%
+            Sleep, %waitForProcessTime%
+            ; Add 10s (default) to ElapsedTime so each exe waiting loop will take at least 10s before trying to run a new instance of hte game
+            timeoutForPID := ElapsedTime + processWaitingTimeout 
+            while(!this.PID AND ElapsedTime < timeoutForPID AND ElapsedTime < timeoutLeft)
+            {
+                existingProcessID := g_userSettings[ "ExeName"]
+                Process, Exist, %existingProcessID%
+                this.PID := ErrorLevel
+                Sleep, 62
+                ElapsedTime := A_TickCount - StartTime
+            }
+            ElapsedTime := A_TickCount - StartTime
+            Sleep, 62
+        }
+    }
+
+    ; Saves this.SavedActiveWindow as the last window and waits for the game exe to load its window.
+    SetLastActiveWindowWhileWaingForGameExe(timeoutLeft := 32000)
+    {
+        StartTime := A_TickCount
+        ; Process exists, wait for the window:
+        while(!(this.Hwnd := WinExist( "ahk_exe " . g_userSettings[ "ExeName"] )) AND ElapsedTime < timeoutLeft)
+        {
+            WinGetActiveTitle, savedActive
+            this.SavedActiveWindow := savedActive
+            ElapsedTime := A_TickCount - StartTime
+            Sleep, 62
+        }
+    }
+
+    ; Template function for swapping windows after another has loaded.
+    ActivateLastWindow() 
+    { 
+        ; Just for prototyping purposes
+        Sleep, 100 ; extra wait for window to load
+        hwnd := this.Hwnd
+        WinActivate, ahk_id %hwnd% ; Idle Champions likes to be activated before it can be deactivated            
+        savedActive := this.SavedActiveWindow
+        WinActivate, %savedActive%
     }
 
     ; Waits for the game to be in a ready state
@@ -745,56 +837,67 @@ class IC_SharedFunctions_Class
         ElapsedTime := 0
         ; wait for game to start
         g_SharedData.LoopString := "Waiting for game started.."
-        while( ElapsedTime < timeout AND !this.Memory.ReadGameStarted())
+        gameStarted := 0
+        while( ElapsedTime < timeout AND !gameStarted)
         {
+            gameStarted := this.Memory.ReadGameStarted()
+            ; If the popup warning message about failed offline progress, restart the game.
+            ; if(this.Memory.ReadDialogActiveBySlot(this.Memory.GetDialogSlotByName("DontShowAgainDialog")) == 1)
+            ; {
+            ;     g_SharedData.LoopString := "Failed offline progress message. Restarting to clear popup."
+            ;     this.CloseIC( "Failed offline progress warning." ) 
+            ;     return false
+            ; }
+            Sleep, 100
             ElapsedTime := A_TickCount - timeoutTimerStart
         }
         ; check if game has offline progress to calculate
         offlineTime := this.Memory.ReadOfflineTime()
-        if(this.Memory.ReadGameStarted())
+        if(gameStarted AND offlineTime <= 0 AND offlineTime != "")
+            return true ; No offline progress to caclculate, game started
+        ; wait for offline progress to finish
+        g_SharedData.LoopString := "Waiting for offline progress.."
+        offlineDone := 0
+        while( ElapsedTime < timeout AND !offlineDone)
         {
-            if(offlineTime <= 0 AND offlineTime != "")
-                return true ; No offline progress to caclculate, game started
-            else
-            {
-                ; wait for offline progress to finish
-                g_SharedData.LoopString := "Waiting for offline progress.."
-                while( ElapsedTime < timeout AND !this.Memory.ReadOfflineDone())
-                {
-                    ElapsedTime := A_TickCount - timeoutTimerStart
-                }
-                ; finished before timeout
-                if(this.Memory.ReadOfflineDone())
-                {
-                    this.WaitForFinalStatUpdates()
-                    g_PreviousZoneStartTime := A_TickCount
-                    return true
-                }
-            }
+            offlineDone := this.Memory.ReadOfflineDone()
+            Sleep, 250
+            ElapsedTime := A_TickCount - timeoutTimerStart
         }
-        ; timed out
-        secondsToTimeout := Floor(timeout/ 1000)
-        this.CloseIC( "WaitForGameReady-Failed to finish in " . secondsToTimeout . "s." )       
+        ; finished before timeout
+        if(offlineDone)
+        {
+            this.WaitForFinalStatUpdates()
+            g_PreviousZoneStartTime := A_TickCount
+            return true
+        }
+        this.CloseIC( "WaitForGameReady-Failed to finish in " . Floor(timeout/ 1000) . "s." )
         return false
     }
 
-    ; Waits until stats are finished updating from offline progress calculations. (Currently just Sleep, 1200)
+    ; Waits until stats are finished updating from offline progress calculations.
     WaitForFinalStatUpdates()
     {
         g_SharedData.LoopString := "Waiting for offline progress (Area Active)..."
+        ElapsedTime := 0
         ; Starts as 1, turns to 0, back to 1 when active again.
-        StartTime := ElapsedTime := A_TickCount
-        while(this.Memory.ReadAreaActive() AND ElapsedTime < 1700)
+        StartTime := A_TickCount
+        while(this.Memory.ReadAreaActive() AND ElapsedTime < 1736)
+        {
             ElapsedTime := A_TickCount - StartTime
-        while(!this.Memory.ReadAreaActive() AND ElapsedTime < 3000)
+            Sleep, 15
+        }
+        while(!this.Memory.ReadAreaActive() AND ElapsedTime < 3038)
+        {
             ElapsedTime := A_TickCount - StartTime
-        ; Briv stacks are finished updating shortly after ReadOfflineDone() completes. Give it a second.
-        ; Sleep, 1200
+            Sleep, 15
+        }
     }
 
     ;Reopens Idle Champions if it is closed. Calls RecoverFromGameClose after opening IC. Returns true if window still exists.
     SafetyCheck()
     {
+        ; TODO: Base case check in case safety check never succeeds in opening the game.
         if (Not WinExist( "ahk_exe " . g_userSettings[ "ExeName"] ))
         {
             if(this.OpenIC() == -1)
@@ -883,6 +986,8 @@ class IC_SharedFunctions_Class
                 this.DirectedInput(,, spam* )
                 counter++
             }
+            else
+                Sleep, 20
         }
         g_SharedData.LoopString := "Waiting for formation swap..."
         formationFavorite := this.Memory.GetFormationByFavorite( formationFavoriteNum )
@@ -896,11 +1001,13 @@ class IC_SharedFunctions_Class
                 this.DirectedInput(,, spam* )
                 counter++
             }
+            else
+                Sleep, 20
         }
         isCurrentFormation := this.IsCurrentFormation( formationFavorite )
         ;spam.Push(this.GetFormationFKeys(formationFavorite1)*) ; make sure champions are leveled
         ;;;if ( this.Memory.ReadNumAttackingMonstersReached() OR this.Memory.ReadNumRangedAttackingMonsters() )
-            g_SharedData.LoopString := "Under attack. Retreating to change formations..."
+        g_SharedData.LoopString := "Under attack. Retreating to change formations..."
         while(!IsCurrentFormation AND (this.Memory.ReadNumAttackingMonstersReached() OR this.Memory.ReadNumRangedAttackingMonsters()) AND (ElapsedTime < (2 * timeout)))
         {
             ElapsedTime := A_TickCount - StartTime
@@ -909,7 +1016,7 @@ class IC_SharedFunctions_Class
             this.ToggleAutoProgress(1, true)
             isCurrentFormation := this.IsCurrentFormation( formationFavorite )
         }
-        this.ToggleAutoProgress(1)
+        g_SharedData.LoopString := "Loading game finished."
     }
 
     ;Returns true if the formation array passed is the same as the formation currently on the game field. Always false on empty formation reads. Requires full formation.
@@ -938,8 +1045,8 @@ class IC_SharedFunctions_Class
         this.InstanceID := this.Memory.ReadInstanceID()
         ; needed to know if there are enough chests to open using server calls
         this.TotalGems := this.Memory.ReadGems()
-        silverChests := this.Memory.GetChestCountByID(1)
-        goldChests := this.Memory.GetChestCountByID(2)
+        silverChests := this.Memory.ReadChestCountByID(1)
+        goldChests := this.Memory.ReadChestCountByID(2)
         this.TotalSilverChests := (silverChests != "") ? silverChests : 0
         this.TotalGoldChests := (goldChests != "") ? goldChests : 0
     }
@@ -994,79 +1101,101 @@ class IC_SharedFunctions_Class
     ;=========================================================
     ;Functions for testing if Automated script is ready to run
     ;=========================================================
+
     /* A function to search a saved formation for a particular champ.
 
         Parameters:
             FavoriteSlot - 1 == Q, 2 == W, 3 == E
-            team - String, used for debugging to identify the formation you are searching though
-            findChamp - 1 == success when champion is found, 0 == success when champion not found
+            includeChampion - 1 == success when champion is found, 0 == success when champion not found
             champID - champion ID to be searched for
 
         Return:
             Array of champion IDs from the saved formation. -1 represents an empty slot.
             A value of "" means run needs to be canceled.
     */
-    FindChampIDinSavedFormation( FavoriteSlot := 1, team := "Speed", findChamp := 1, champID := 58 )
+    ; Finds a specific champ in a favorite formation. Returns -1 on failure and the formation object otherwise.
+    FindChampIDinSavedFavorite( champID := 58, favorite := 1, includeChampion := True )
     {
-        memoryVersion := this.Memory.GameManager.GetVersion()
-        formationSaveSlot := this.Memory.GetSavedFormationSlotByFavorite( FavoriteSlot )
-        ; Test Favorite Exists
-        txtCheck := "1. Check the correct memory file is being used. Current version: " . memoryVersion
-        txtcheck .= "`n`n2. If IC is running with admin privileges, then the script will also require admin privileges."
-        if (this.Memory.GameManager.is64bit())
-            txtcheck .= "`n`n3. Check AHK is 64bit."
-        while ( formationSaveSlot == -1 )
-        {
-            MsgBox, 5,, Please confirm a formation is saved in formation favorite slot %FavoriteSlot%.`n`nOther potential solutions:`n`n%txtCheck%
-            IfMsgBox, Retry
-            {
-                this.Memory.OpenProcessReader()
-                formationSaveSlot := this.Memory.GetSavedFormationSlotByFavorite( FavoriteSlot )
-            }
-            IfMsgBox, Cancel
-            {
-                MsgBox, Canceling Run
-                return ""
-            }
-        }
+        formationSaveSlot := this.Memory.GetSavedFormationSlotByFavorite( favorite )
+        if (formationSaveSlot < 0)
+            return -1
         formation := this.Memory.GetFormationSaveBySlot( formationSaveSlot, 0 )
-        var := formation.Count()
-        ; Test that the formation has champions
-        while !var
-        {
-            MsgBox, 5,, Please confirm your %team% team is saved in formation favorite slot %FavoriteSlot%.`n`nOther potential solutions:`n`n%txtCheck%
-            IfMsgBox, Retry
-            {
-                this.Memory.OpenProcessReader()
-                formation := this.Memory.GetFormationSaveBySlot( formationSaveSlot, 1 )
-                var := formation.Count()
-            }
-            IfMsgBox, Cancel
-            {
-                MsgBox, Canceling Run
-                return ""
-            }
-        }
+        formationSize := formation.Count()
+        if (!formationSize OR formationSize > 50 OR formationSize < 0 )
+            return -1
         foundChamp := this.IsChampInFormation(champID, formation)
-        foundChampName := this.Memory.ReadChampNameByID(champID)
-        stateText := findChamp ? "is" : "isn't"
-        ; Test that the specific champions is in the formation
-        while ( foundChamp != findChamp )
+        if (!foundChamp AND includeChampion)
+            return -1
+        else if (foundChamp AND !includeChampion)
+            return -1
+        return formation
+        ; foundChampName := this.Memory.ReadChampNameByID(champID)
+    }
+
+    ; Displays a MsgBox with a prompt until the test function succeeds or prompt is canceled. Returns -1 on cancel.
+    RetryTestOnError( errMsg := "Error", testFunction := "", expectedValue := "", shouldBeEqual := True, testSize := False)
+    {
+        if(testFunction == "" OR testFunction.Base.Call != "")
         {
-            MsgBox, 5,, Please confirm %foundChampName% %stateText% saved in formation favorite slot %FavoriteSlot%.`n`nOther potential solutions:`n`n%txtCheck%
+            MsgBox,, RetryTstOnError, No function to retry!
+            return -1
+        }
+        foundValue := testFunction.Call() ; Some value that should never be read from game's memory. Do while loop at least once.
+        
+        ; Test if expected value matches OR test if should NOT find expected value
+        while ( (foundValue == expectedValue AND !shouldBeEqual) OR (foundValue != expectedValue AND shouldBeEqual) )
+        {
+            MsgBox, 5,, %errMsg%
             IfMsgBox, Retry
             {
                 this.Memory.OpenProcessReader()
-                formation := this.Memory.GetFormationByFavorite( FavoriteSlot )
-                foundChamp := this.IsChampInFormation(champID, formation)
+                foundValue := testFunction.Call()
+                if (testSize)
+                    foundValue := foundValue.Count()
             }
             IfMsgBox, Cancel
             {
                 MsgBox, Canceling Run
-                return ""
+                return -1
             }
         }
-        return formation
+        return foundValue
+    }
+
+    ; -----------------------------------------------------------------
+    /* A function to search a saved favorite for familiars on click damage.
+
+        Parameters:
+            favorite - 1 == Q, 2 == W, 3 == E
+            shouldInclude - Whether the formation should include familiars
+
+        Return:
+            -1 if invalid favorite.
+            ErrorMsg - a string containing an error message if needed.
+            "" if all checks passed okay.
+    */
+    ; -----------------------------------------------------------------
+
+    ;Searches a saved favorite for familiars on click damage.
+    FormationFamiliarCheckByFavorite(favorite := 1, shouldInclude := True)
+    {
+        ErrorMsg := ""
+        if(favorite < 1 OR favorite > 3)
+            return -1 ; failed call. -1 is used because "" IS a valid read from this function.
+        FormationFavoriteHotkey := {1:"Q", 2:"W", 3:"E"}
+        ; Favorites 1 and 3 SHOULD have familirs.
+        ; Formation 2 should NOT have familiars.
+        if (shouldInclude AND this.Memory.GetFormationFamiliarsByFavorite(favorite) == "")
+        {
+            ErrorMsg := "Warning: No famliars found in Favorite Formation " . favorite . " (" . FormationFavoriteHotkey[favorite] . "). It is highly recommended to use familiars for click damage."
+            return ErrorMsg
+        }
+        if (!shouldInclude AND this.Memory.GetFormationFamiliarsByFavorite(favorite) != "")
+        {
+            ErrorMsg := "Familiars found in Favorite Formation " . favorite . " (" . FormationFavoriteHotkey[favorite] . "). Remove familiars before continuing."
+            return ErrorMsg
+        }
+        return ErrorMsg
     }
 
     ; Tests if there is an adventure (objective) loaded. If not, asks the user to verify they are using the correct memory files and have an adventure loaded
@@ -1081,8 +1210,8 @@ class IC_SharedFunctions_Class
             txtcheck .= "`n2. Make sure the game exe in Game Location settings is set to ""IdleDragons.exe"""
             txtCheck .= "`n3. Check the correct memory file is being used. `n    Current version: " . this.Memory.GameManager.GetVersion()
             txtcheck .= "`n4. If IC is running with admin privileges, then the script will also require admin privileges."
-            if (this.Memory.GameManager.is64bit())
-                txtcheck .= "`n5. Check AHK is 64bit."
+            if (_MemoryManager.is64bit)
+                txtcheck .= "`n5. Check AHK is 64-bit. (Currently " . (A_PtrSize = 4 ? 32 : 64) . "-bit)"
             MsgBox, 5,, % txtCheck
 
             IfMsgBox, Retry
@@ -1135,11 +1264,15 @@ class IC_SharedFunctions_Class
         skipChance := ActiveEffectKeySharedFunctions.Briv.BrivUnnaturalHasteHandler.ReadSkipChance()
         distance := this.Memory.GetModronResetArea()
         ; skipAmount == 1 is a special case where Briv won't use stacks when he skips 0 areas.
-        if (worstCase)
-            jumps := skipAmount == 1 ? Floor(distance / (skipAmount+1)) : Floor(distance / (skipChance >= 1 ? skipAmount + 1 : skipAmount))
+        ; average
+        if(skipAmount == 1) ; true worst case =  worstCase ? Ceil(distance / 2) : normalcalc
+            jumps := worstCase ? Ceil(((distance - (distance/((skipAmount*(1-skipChance))+(skipAmount+1)*skipChance))*(1-skipChance)) / (skipAmount + 1)) * 1.15) : Ceil((distance - (distance/((skipAmount*(1-skipChance))+(skipAmount+1)*skipChance))*(1-skipChance)) / (skipAmount + 1))
         else
-            jumps := skipAmount == 1 ? Floor(distance / ((skipAmount+1) * skipChance)) : Floor(distance / ((skipAmount * (1-skipChance)) + ((skipAmount+1) * skipChance)))
+            jumps := Ceil(distance / ((skipAmount * (1-skipChance)) + ((skipAmount+1) * skipChance)))
+        isEffectively100 := 1 - skipChance < .004
         stacks := Ceil(49 / (1+consume)**jumps)
+        if (worstCase AND skipChance < 1 AND !isEffectively100 AND skipAmount != 1) 
+            stacks := Floor(stacks * 1.15) ; 15% more - guesstimate
         return stacks
     }
 
@@ -1153,19 +1286,21 @@ class IC_SharedFunctions_Class
         skipChance := ActiveEffectKeySharedFunctions.Briv.BrivUnnaturalHasteHandler.ReadSkipChance()
         distance := targetZone - startZone
         ; skipAmount == 1 is a special case where Briv won't use stacks when he skips 0 areas.
-        if (worstCase)
-            jumps := skipAmount == 1 ? Max(Floor(distance / (skipAmount+1)), 0) : Max(Floor(distance / skipAmount), 0)
+        if(skipAmount == 1)
+            jumps := worstCase ? Max(Ceil(distance / 2),0) : Max(Ceil((distance - (distance/((skipAmount*(1-skipChance))+(skipAmount+1)*skipChance))*(1-skipChance)) / (skipAmount + 1)),0)
         else
-            jumps := skipAmount == 1 ? Max(Floor(distance / ((skipAmount+1) * skipChance)), 0) : Max(Floor(distance / ((skipAmount * (1-skipChance)) + ((skipAmount+1) * skipChance))), 0)
-
+            jumps :=  Max(Floor(distance / ((skipAmount * (1-skipChance)) + ((skipAmount+1) * skipChance))), 0)
+        isEffectively100 := 1 - skipChance < .004
+        if (worstCase AND skipChance < 1 AND !isEffectively100 AND skipAmount != 1)
+            jumps := Floor(jumps * 1.05)
         return Floor(stacks*(1+consume)**jumps)
     }
 
     ; Calculates the number of Haste stacks will be used to progress from the current zone to the modron reset area.
-    CalculateBrivStacksConsumedToReachModronResetZone()
+    CalculateBrivStacksConsumedToReachModronResetZone(worstCase := true)
     {
         stacks := ActiveEffectKeySharedFunctions.Briv.BrivUnnaturalHasteHandler.ReadHasteStacks()
-        return stacks - this.CalculateBrivStacksLeftAtTargetZone(this.Memory.ReadCurrentZone(), this.Memory.GetModronResetArea())
+        return stacks - this.CalculateBrivStacksLeftAtTargetZone(this.Memory.ReadCurrentZone(), this.Memory.GetModronResetArea() + 1, worstCase)
     }
 
     ; Calculates the farthest zone Briv expects to jump to with his current stacks on his current zone.  avgMinOrMax: avg = 0, min = 1, max = 2.
@@ -1194,6 +1329,12 @@ class IC_SharedFunctions_Class
         if (specID == 3455)
             return true
         return false
+    }
+
+    IsChampInFavoriteFormation(champID := 1, favorite := 1)
+    {
+        formation := this.Memory.GetFormationByFavorite(favorite)
+        return this.IsChampInFormation(champID, formation)
     }
 
     /*  GetFormationFKeys - Gets a list of FKeys required to level all champions in the formation passed to it.

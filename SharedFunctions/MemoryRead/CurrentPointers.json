@@ -10,7 +10,7 @@
 	"DialogManager":{
 		"moduleAddress":4824176,
 		"moduleOffset":[
-			2496
+			2480
 		],
 		"staticOffset":""
 	},
@@ -29,13 +29,13 @@
 		"staticOffset":2688
 	},
 	"IdleGameManager":{
-		"moduleAddress":4823856,
+		"moduleAddress":4807312,
 		"moduleOffset":[
-			3376
+			3248
 		],
 		"staticOffset":""
 	},
 	"is64":1,
 	"Platform":"Steam",
-	"Version":521
+	"Version":"508-DM-Alt"
 }

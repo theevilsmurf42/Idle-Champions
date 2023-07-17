@@ -13,6 +13,8 @@
     1. Added current time and processing time as data to pull from user details
 */
 
+; json library must be included if this file is used outside of Script Hub
+
 class IC_ServerCalls_Class
 {
     userID := 0
@@ -24,7 +26,7 @@ class IC_ServerCalls_Class
     userDetails := ""
     activePatronID := 0
     dummyData := ""
-    webRoot := "https://ps20.idlechampions.com/~idledragons/"
+    webRoot := "http://ps22.idlechampions.com/~idledragons/"
     timeoutVal := 60000
     playServerExcludes := "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
 
@@ -39,7 +41,7 @@ class IC_ServerCalls_Class
 
     GetVersion()
     {
-        return "v2.4.0, 2022-07-17"
+        return "v2.4.1, 2023-06-14"
     }
 
     UpdateDummyData()
@@ -71,10 +73,11 @@ class IC_ServerCalls_Class
             WR.Send()
             WR.WaitForResponse( -1 )
             data := WR.ResponseText
+            ; dataLB := data . "`n"
+            ; FileAppend, %dataLB%, % A_LineFile . "\..\ServerLog.txt"
             Try
             {
                 response := JSON.parse(data)
-                ; TODO: Add check for outdated Instance ID
                 if(!(response.switch_play_server == ""))
                 {
                     return this.ServerCall( callName, parameters, timeoutVal ) 
@@ -82,9 +85,16 @@ class IC_ServerCalls_Class
             }
             ;catch "Failed to fetch valid JSON response from server."
         }
+        ; catch except
+        ; {
+        ;     exceptMessage := except.Message
+        ;     exceptMessage .= " Extra: " . except.Extra
+        ;     FileAppend, %exceptMessage%, % A_LineFile . "\..\ErrorLog.txt"
+        ; }
         return response
     }
 
+    ; Pulls user details from the server and returns it in a json parsed object.
     CallUserDetails() 
     {
         getUserParams := this.dummyData . "&include_free_play_objectives=true&instance_key=1&user_id=" . this.userID . "&hash=" . this.userHash
@@ -92,6 +102,7 @@ class IC_ServerCalls_Class
         return userDetails
     }
 
+    ; Starts a new adventure and returns the response.
     CallLoadAdventure( adventureToLoad ) 
     {
         patronTier := this.activePatronID ? 1 : 0
@@ -100,7 +111,7 @@ class IC_ServerCalls_Class
         return this.ServerCall( "setcurrentobjective", advParams )
     }
 
-    ;calling this loses everything earned during the adventure, should only be used when stuck.
+    ; Calling this loses everything earned during the adventure, should only be used when stuck.
     CallEndAdventure() 
     {
         advParams := this.dummyData "&user_id=" this.userID "&hash=" this.userHash "&instance_id=" this.instanceID "&game_instance_id=" this.activeModronID
@@ -116,6 +127,7 @@ class IC_ServerCalls_Class
         return this.ServerCall( "convertresetcurrency", (advParams . extraParams))
     }
 
+    ; Buys <chests> number of <chestID> chests. Automatically uses Patron purchase call for patron chests.
     CallBuyChests( chestID, chests )
     {
         if ( chests > 100 )
@@ -151,10 +163,11 @@ class IC_ServerCalls_Class
         }
     }
 
+    ; Open <chests> number of <chestID> chest.
     CallOpenChests( chestID, chests )
     {
-        if ( chests > 99 )
-            chests := 99
+        if ( chests > 1000 )
+            chests := 1000
         else if ( chests < 1 )
             return
         chestParams := "&gold_per_second=0&checksum=4c5f019b6fc6eefa4d47d21cfaf1bc68&user_id=" this.userID "&hash=" this.userHash 
@@ -181,29 +194,15 @@ class IC_ServerCalls_Class
         else
             return 0
     }
-
-    ParseChestResults( chestResults )
-    {
-        this.shinies := 0
-        string := ""
-        for k, v in chestResults.loot_details
-        {
-            if v.gilded
-            {
-                this.shinies += 1
-                string .= "New shiny! Champ ID: " . v.hero_id . " (Slot " . v.slot_id . ")`n"
-            }
-        }
-        return string
-    }
-
+    
+    ; Special server call spcifically for use with saves. saveBody must be encoded before using this call.
     ServerCallSave( saveBody ) 
     {
         response := ""
         URLtoCall := this.webroot . "post.php?call=saveuserdetails&"
         WR := ComObjCreate( "WinHttp.WinHttpRequest.5.1" )
         ; https://learn.microsoft.com/en-us/windows/win32/winhttp/iwinhttprequest-settimeouts defaults: 0 (DNS Resolve), 60000 (connection timeout. 60s), 30000 (send timeout), 60000 (receive timeout)
-        WR.SetTimeouts( "0", "60000", "30000", "120000" )
+        WR.SetTimeouts( "0", "15000", "7500", "30000" )
         ; WR.SetProxy( 2, "IP:PORT" )  Send web traffic through a proxy server. A local proxy may be helpful for debugging web calls.
         Try {
             WR.Open( "POST", URLtoCall, true )
@@ -220,7 +219,6 @@ class IC_ServerCalls_Class
             Try
             {
                 response := JSON.parse(data)
-                ; TODO: Add check for outdated Instance ID
                 if(!(response.switch_play_server == ""))
                 {
                     return this.ServerCallSave( saveBody ) 
@@ -251,7 +249,7 @@ class IC_ServerCalls_Class
         {
             if A_Index in % this.playServerExcludes
                 continue
-            this.webRoot := "https://ps" . A_Index . ".idlechampions.com/~idledragons/"
+            this.webRoot := "http://ps" . A_Index . ".idlechampions.com/~idledragons/"
             response := this.CallGetPlayServer()
             testCount := 1
             if (response != "" and response.processing_time != "")
@@ -296,7 +294,7 @@ class IC_ServerCalls_Class
         else
         {
             oldWebRoot := this.webRoot
-            this.webRoot := "https://ps23.idlechampions.com/~idledragons/" ; assume ps23 will always be available (avoiding using master)
+            this.webRoot := "http://ps23.idlechampions.com/~idledragons/" ; assume ps23 will always be available (avoiding using master)
             response := this.CallGetPlayServer()
             if (response != "" AND response.play_server != "")
                 this.webRoot := response.play_server

@@ -28,14 +28,10 @@ buttonFunc.Call()
 
 Gui, ICScriptHub:Add, Text, vInventoryViewTimeStampID x15 y+15 w455, % "Last Updated: "
 
-if(g_isDarkMode)
-    Gui, ICScriptHub:Font, g_CustomColor
+GUIFunctions.UseThemeTextColor("TableTextColor")
 Gui, ICScriptHub:Add, ListView, x15 y+5 w450 h450 vInventoryViewID, `ID|Name|Amount|Change|Per `Run
-if(g_isDarkMode)
-{
-    GuiControl,ICScriptHub: +Background888888, InventoryViewID
-    Gui, ICScriptHub:Font, cSilver
-}
+GUIFunctions.UseThemeListViewBackgroundColor("InventoryViewID")
+g_SF.Memory.InitializeChestsIndices()
 
 ; Highly recommended to use classes to reduce chance of interference with other addons/code.
 ; Below is the functionality included with the component. For readability in more complex addons, these will often be separated 
@@ -83,18 +79,27 @@ class IC_InventoryView_Component
     ; Loads settings from the addon's setting.json file.
     LoadSettings()
     {
+        writeSettings := False
         this.Settings := g_SF.LoadObjectFromJSON( A_LineFile . "\..\Settings.json")
-        if(this.Settings == "")
+        if(!IsObject(this.Settings))
         {
             this.Settings := {}
-            this.Settings["LoadChests"] := True
-            this.Settings["LoadBuffs"] := True
-            this.SaveSettings()
+            writeSettings := True
         }
-        if(this.Settings["LoadChests"] == "")
+        if(!(this.Settings["LoadChests"] is integer))
+        {
             this.Settings["LoadChests"] := True
-        if(this.Settings["LoadBuffs"] == "")
+            writeSettings := True
+        }
+        if(!(this.Settings["LoadBuffs"] is integer))
+        {
             this.Settings["LoadBuffs"] := True
+            writeSettings := True
+        }
+        if(writeSettings)
+        {
+            g_SF.WriteObjectToJSON( A_LineFile . "\..\Settings.json", this.Settings )
+        }
         GuiControl,ICScriptHub:, g_InventoryViewChestsCheckbox, % this.Settings["LoadChests"]
         GuiControl,ICScriptHub:, g_InventoryViewBuffsCheckbox, % this.Settings["LoadBuffs"]
         Gui, Submit, NoHide
@@ -122,8 +127,8 @@ class IC_InventoryView_Component
             return "" 
         loop, %size%
         {
-            chestID := g_SF.Memory.GetInventoryChestIDBySlot(A_Index)
-            itemAmount := g_SF.Memory.GetInventoryChestCountBySlot(A_Index)
+            chestID := g_SF.Memory.ReadInventoryChestIDBySlot(A_Index - 1)
+            itemAmount := g_SF.Memory.ReadInventoryChestCountBySlot(A_Index - 1)
             itemName := g_SF.Memory.GetChestNameByID(chestID)
             change := this.GetChange(chestID, itemAmount, "Chest")
             perRunVal := Round(change / runCount, 2)

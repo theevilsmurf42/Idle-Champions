@@ -1,6 +1,5 @@
 ; ############################################################
 ;                        Includes
 ; ############################################################
-#include *i %A_LineFile%\..\Example_Gui.ahk
-#include *i %A_LineFile%\..\Example_Functions.ahk
-#include *i %A_LineFile%\..\Example_Component.ahk
+#include *i %A_LineFile%\..\Example_ServerCall_Gui.ahk
+#include *i %A_LineFile%\..\Example_ServerCall_Component.ahk

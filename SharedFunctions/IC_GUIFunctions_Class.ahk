@@ -1,10 +1,15 @@
+#include %A_LineFile%\..\json.ahk
+
 class GUIFunctions
 {
     isDarkMode := false
+    CurrentTheme := ""
+    FileOverride := ""
+
+    ; Adds a tab to Script Hub's tab control
     AddTab(Tabname){
         addedTabs := Tabname . "|"
         GuiControl,ICScriptHub:,ModronTabControl, % addedTabs
-        ; TODO: contain tablist
         g_TabList .= addedTabs
         ; Increase UI width to accommodate new tab.
         StrReplace(g_TabList,"|",,tabCount)
@@ -13,6 +18,7 @@ class GUIFunctions
         Gui, ICScriptHub:show, % "w" . g_TabControlWidth . " h" . g_TabControlHeight
     }
 
+    ; Updates the tab control's size based on global width/height settings
     RefreshTabControlSize()
     {
         GuiControl, ICScriptHub:Move, ModronTabControl, % "w" . g_TabControlWidth . " h" . g_TabControlHeight
@@ -31,19 +37,196 @@ class GUIFunctions
     AddToolTip(controlVariableName, tipMessage)
     {
         global
-        WinGet ICScriptHub_ID, ID, A
-        GuiControl ICScriptHub:Focus, %controlVariableName%
-        ControlGetFocus toolTipTarget, ahk_id %ICScriptHub_ID%
+        toolTipTarget := this.GetToolTipTarget(controlVariableName)
         g_MouseToolTips[toolTipTarget] := tipMessage
     }
 
-    SetThemeTextColor()
-    {  
-        if(this.isDarkMode)
-            Gui, ICScriptHub:Font, cSilver w400
-        else
-            Gui, ICScriptHub:Font, cDefault w400
+    ; Finds a control ID based on its variable name.
+    GetToolTipTarget(controlVariableName)
+    {
+        global
+        WinGet ICScriptHub_ID, ID, A
+        GuiControl ICScriptHub:Focus, %controlVariableName%
+        ControlGetFocus toolTipTarget, ahk_id %ICScriptHub_ID%
+        return toolTipTarget
     }
+
+     
+    ; Filters a combo box's list based on what is in the edit box. _List must be an unaltered original combobox list.
+    FilterList(controlID, _List)
+    {
+        global g_KeyInputTimer
+        global g_KeyInputTimerDelay
+
+        static CB_GETCOMBOBOXINFO := 0x0164
+            , CB_SETMINVISIBLE   := 0x1701
+            , CB_SHOWDROPDOWN    := 0x014F
+            , WM_SETCURSOR       := 0x0020
+            , EM_SETSEL          := 0x00B1
+            , hEdit              := 0
+            , CBN_EDITCHANGE     := 5
+            , LastID             := 0
+        timeSinceLast := A_TickCount - g_KeyInputTimer
+        if (timeSinceLast < g_KeyInputTimerDelay)
+            return
+        g_KeyInputTimer := A_TickCount
+        ; Location of edit box for this control
+        if (!hEdit OR LastID != controlID)
+        {
+            VarSetCapacity(COMBOBOXINFO, size := 40 + A_PtrSize*3)
+            NumPut(size, COMBOBOXINFO)
+            SendMessage, CB_GETCOMBOBOXINFO,, &COMBOBOXINFO,, ahk_id %controlID%
+            hEdit := NumGet(COMBOBOXINFO, 40 + A_PtrSize)
+        }
+        LastID := controlID
+
+        ControlGet, currList, List, , , ahk_id %controlID%
+        currListItems := StrSplit(currList, "`n")
+        items := StrSplit(_List, "|")
+        items.Delete(1) ; remove first entry (null after split)     
+        GuiControlGet, inputText,, %controlID%
+
+        newComboList := ""
+        count := 0
+        StartTime := A_TickCount
+        Loop, % items.Count()
+        {
+            
+            if(items[A_Index] != "" AND InStr(items[A_Index], inputText, False))
+            {
+                newComboList .= "|" . items[A_Index]
+                count++
+            }
+        }
+        if (count != 1)
+        {
+            GuiControl,, %controlID%, % newComboList = "" ? "|" : newComboList
+            bool := !(newComboList = "" || StrLen(inputText) < 1)
+            SendMessage, CB_SHOWDROPDOWN, bool,,, ahk_id %controlID%
+            SendMessage, CB_SETMINVISIBLE, count = 0 ? 1 : count > 30 ? 30 : count,,, ahk_id %controlID%
+            GuiControl, Text, %hEdit%, % inputText
+            SendMessage, EM_SETSEL, -2, -1,, ahk_id %hEdit%
+            SendMessage, WM_SETCURSOR,,,, ahk_id %hEdit%
+        }
+        else if (currListItems.Count() == items.Count())
+        {
+            singleItem := StrSplit(newComboList, "|")
+            bool := singleItem[2] != inputText
+            if(bool)
+            {
+                inputText := singleItem[2]
+                GuiControl, Text, %hEdit%, % singleItem[2]
+                Control, ChooseString, %inputText%,, ahk_id %controlID%
+            }
+        }
+        else
+        {
+            GuiControl,, %controlID%, % _List
+            singleItem := StrSplit(newComboList, "|")
+            bool := singleItem[2] != inputText
+            itemCount := items.Count()
+            SendMessage, CB_SETMINVISIBLE, itemCount > 30 ? 30 : itemCount ,,, ahk_id %controlID%
+            SendMessage, CB_SHOWDROPDOWN, False,,, ahk_id %controlID%
+            Control, ChooseString, %inputText%,, ahk_id %controlID%
+        }
+        return
+    }
+
+    ; Returns true if string is alphanumeric (can include -) 
+    TestInputForAlphaNumericDash(textValue)
+    {
+        match := RegExMatch(textValue, "i)[^a-z^0-9^\-]")
+        return match == 0 ? True : False
+    }
+
+    ;=================================
+    ; Script Theme Functions
+    ;=================================
+
+    ; Gets the current theme from a file and sets it for use when using other theme functions.
+    LoadTheme(guiName := "ICScriptHub", fileOverride := "")
+    {
+        this.GUIName := guiName
+        objData := ""
+        if(this.CurrentTheme != "" AND fileOverride == "" AND this.FileOverride == "")
+            return
+        FileName := ""
+        if (fileOverride != "")
+        {
+            FileName := fileOverride
+            this.FileOverride := fileOverride
+        }
+        if (FileName == "" )
+        {
+            FileName := A_LineFile . "\..\..\Themes\CurrentTheme.json"
+            this.FileOverride := ""
+        }
+        if(FileExist(FileName))
+        {
+            FileRead, objData, %FileName%
+        }
+        else
+        {
+            FileName := A_LineFile . "\..\..\Themes\DefaultTheme.json"
+            FileRead, objData, %FileName%
+        }
+        
+        this.CurrentTheme := JSON.parse( objData )
+        this.isDarkMode := this.currentTheme["UseDarkThemeGraphics"]
+    }
+
+    ; Sets the color/weight for subsequent text based on the theme.
+    UseThemeTextColor(textType := "default", weight := 400)
+    {  
+        guiName := this.GUIName
+        if(textType == "default")
+            textType := "DefaultTextColor"
+        ; if number, convert to hex
+        textColor := (this.CurrentTheme[textType] * 1 == "") ? this.CurrentTheme[textType] : Format("{:#x}", this.CurrentTheme[textType])
+        Gui, %guiName%:Font, c%textColor% w%weight%
+    }
+
+    ; Sets the script GUI background color based on the theme.
+    UseThemeBackgroundColor()
+    {
+        guiName := this.GUIName
+        ; if number, convert to hex
+        windowColor := (this.CurrentTheme[ "WindowColor" ] * 1 == "") ? this.CurrentTheme[ "WindowColor" ] : Format("{:#x}", this.CurrentTheme[ "WindowColor" ])
+        Gui, %guiName%:Color, % windowColor
+    }
+
+    ; Sets a listview background color based on the theme.
+    UseThemeListViewBackgroundColor(controlID := "")
+    {
+        guiName := this.GUIName
+        ; if number, convert to hex
+        bgColor := (this.CurrentTheme[ "TableBackgroundColor" ] * 1 == "") ? this.CurrentTheme[ "TableBackgroundColor" ] : Format("{:#x}", this.CurrentTheme[ "TableBackgroundColor" ])
+        GuiControl, %guiName%: +Background%bgColor%, %controlID%
+    }
+
+    ; Sets the window title bar to dark if theme is a dark theme. GUI must be shown before calling.
+    UseThemeTitleBar(guiName, refresh := true)
+    {
+        if(this.isDarkMode AND guiName != "")
+        {
+            if (A_OSVersion >= "10.0.17763" && SubStr(A_OSVersion, 1, 3) = "10.") 
+            {
+                attr := 19
+                if (A_OSVersion >= "10.0.18985") {
+                    attr := 20
+                }
+                Gui, %guiName%: +hwndGuiID
+                DllCall("dwmapi\DwmSetWindowAttribute", "ptr", GuiID, "int", attr, "int*", true, "int", 4)
+                ; refresh window
+                if(refresh)
+                {
+                    Gui, %guiName%:Hide
+                    Gui, %guiName%:Show
+                }
+            }
+        }
+    }
+
     ;------------------------------
     ;
     ; Function: LVM_CalculateSize

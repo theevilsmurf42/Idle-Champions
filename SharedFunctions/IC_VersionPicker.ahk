@@ -4,7 +4,12 @@
 #include %A_LineFile%\..\CLR.ahk
 #include *i %A_LineFile%\..\MemoryRead\Imports\IC_GameVersion64_Import.ahk
 #include *i %A_LineFile%\..\MemoryRead\Imports\IC_GameVersion32_Import.ahk
+#include %A_LineFile%\..\IC_GUIFunctions_Class.ahk
+
 Gui, ICSHVersionPicker:New
+GUIFunctions.LoadTheme("ICSHVersionPicker")
+GUIFunctions.UseThemeBackgroundColor()
+GUIFunctions.UseThemeTextColor()
 Gui, ICSHVersionPicker:+Resize -MaximizeBox
 Gui, ICSHVersionPicker:Add, GroupBox, w300 h75, Pointer Select: 
 Gui, ICSHVersionPicker:Add, Text, xp+10 yp+15 w100, Platform:
@@ -18,6 +23,7 @@ Gui, ICSHVersionPicker:Add, Text, x20 y+8 w300 h26 vVersionPickerSuggestionText2
 Gui, ICSHVersionPicker:Font, w400
 Gui, ICSHVersionPicker:Add, Text, x13 y+2 w300 vVersionPickerDetectionText, Script Hub Recommends: Checking...
 Gui, ICSHVersionPicker:Show, , Memory Version Picker
+GUIFunctions.UseThemeTitleBar("ICSHVersionPicker")
 
 global scriptLocation := A_LineFile . "\..\"
 global g_VersionPickerPlatformChoice
@@ -100,7 +106,12 @@ VersionPickerSaveChoice()
     }
     else
     {
-        MsgBox,1,, There was a problem saving the settings. Closing script.
+        errMsg := "There was a problem saving the settings."
+        errMsg .= "`nMake sure you have write permissions to the Script Hub directory."
+        errMsg .= "`n  1) Make sure you have write permissions to Script Hub's Folder. (e.g. The script is not in Program Files)"
+        errMsg .= "`n  2) Try running the script as Admin."
+        errMsg .= "`nClosing script."
+        MsgBox,0,, %errMsg%
         IfMsgBox, OK
             ExitApp
         IfMsgBox, Cancel

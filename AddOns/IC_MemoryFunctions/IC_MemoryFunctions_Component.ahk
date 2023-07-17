@@ -12,17 +12,7 @@ Check_Clicked()
         ReadMemoryFunctions.CheckReads()
     return
 }
-
-IC_MemoryFunctions_ReadMemory()
-{
-    if(g_SF.Memory.ReadCurrentZone() != "" AND g_SF.Memory.ReadGems() != "")
-    {
-        if(IsFunc(Func("ReadMemoryFunctionsExtended.CheckReads")))
-            ReadMemoryFunctionsExtended.CheckReads()
-        else if (IsFunc(Func("ReadMemoryFunctions.CheckReads")))
-            ReadMemoryFunctions.CheckReads()
-    }
-}
+GUIFunctions.UseThemeTextColor()
 
 ; Can combine up to 1 primary and up to 1 secondary 
 ; Primary contains ReadMemoryFunctions class. Secondary contains ReadMemoryFunctionsExtended class.
@@ -32,5 +22,9 @@ IC_MemoryFunctions_ReadMemory()
 ; Secondary
 #include *i %A_LineFile%\..\IC_MemoryFunctions_Component_CommonlyErrored.ahk
 
+
+Gui, ICScriptHub:Add, Text, vMemFuncHiddenEnd x+2 Hidden,
+GuiControlGet, pos, ICScriptHub:Pos, MemFuncHiddenEnd
+g_TabControlHeight := Max(g_TabControlHeight, posY + 30)
 GuiControl, ICScriptHub:Move, ModronTabControl, % "w" . g_TabControlWidth . " h" . g_TabControlHeight
 Gui, ICScriptHub:show, % "w" . g_TabControlWidth+5 . " h" . g_TabControlHeight

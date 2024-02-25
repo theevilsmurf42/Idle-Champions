@@ -37,7 +37,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		}
 	},
 	"CNE":{
@@ -78,7 +88,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"478":{
 			"CrusadersGameDataSet":{
@@ -117,7 +137,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"497":{
 			"CrusadersGameDataSet":{
@@ -156,7 +186,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"507":{
 			"CrusadersGameDataSet":{
@@ -195,7 +235,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"508":{
 			"CrusadersGameDataSet":{
@@ -234,7 +284,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"461.2":{
 			"CrusadersGameDataSet":{
@@ -278,7 +338,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":0
+			"is64":0,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		}
 	},
 	"EGS":{
@@ -319,7 +389,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"472":{
 			"CrusadersGameDataSet":{
@@ -358,7 +438,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"480":{
 			"CrusadersGameDataSet":{
@@ -397,7 +487,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"497":{
 			"CrusadersGameDataSet":{
@@ -436,7 +536,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"504":{
 			"CrusadersGameDataSet":{
@@ -475,7 +585,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"508":{
 			"CrusadersGameDataSet":{
@@ -514,7 +634,176 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
+		},
+		"533":{
+			"CrusadersGameDataSet":{
+				"moduleAddress":4807792,
+				"moduleOffset":[
+					56,
+					3664
+				],
+				"staticOffset":""
+			},
+			"DialogManager":{
+				"moduleAddress":4807792,
+				"moduleOffset":[
+					2512
+				],
+				"staticOffset":""
+			},
+			"EngineSettings":{
+				"moduleAddress":4863576,
+				"moduleOffset":[
+					672
+				],
+				"staticOffset":3936
+			},
+			"GameSettings":{
+				"moduleAddress":4800064,
+				"moduleOffset":[
+					2080
+				],
+				"staticOffset":2688
+			},
+			"IdleGameManager":{
+				"moduleAddress":4790928,
+				"moduleOffset":[
+					3208
+				],
+				"staticOffset":""
+			},
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
+		},
+		"546":{
+			"CrusadersGameDataSet":{
+				"moduleAddress":4862904,
+				"moduleOffset":[
+					528,
+					3104
+				],
+				"staticOffset":""
+			},
+			"DialogManager":{
+				"moduleAddress":4807792,
+				"moduleOffset":[
+					2512
+				],
+				"staticOffset":""
+			},
+			"EngineSettings":{
+				"moduleAddress":4863576,
+				"moduleOffset":[
+					672
+				],
+				"staticOffset":3936
+			},
+			"GameSettings":{
+				"moduleAddress":4800064,
+				"moduleOffset":[
+					2080
+				],
+				"staticOffset":2688
+			},
+			"IdleGameManager":{
+				"moduleAddress":4790928,
+				"moduleOffset":[
+					3208
+				],
+				"staticOffset":""
+			},
+			"is64":1,
+			"UserData":{
+				"moduleAddress":0,
+				"moduleOffset":[
+					0
+				],
+				"staticOffset":0
+			},
+			"UserStatHandler":{
+				"moduleAddress":0,
+				"moduleOffset":[
+					0
+				],
+				"staticOffset":0
+			}
+		},
+		"553":{
+			"CrusadersGameDataSet":{
+				"moduleAddress":4835272,
+				"moduleOffset":[
+					64,
+					3248
+				],
+				"staticOffset":""
+			},
+			"DialogManager":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					2480
+				],
+				"staticOffset":""
+			},
+			"EngineSettings":{
+				"moduleAddress":4807312,
+				"moduleOffset":[
+					3528,
+					120,
+					216
+				],
+				"staticOffset":4032
+			},
+			"GameSettings":{
+				"moduleAddress":4816448,
+				"moduleOffset":[
+					2080
+				],
+				"staticOffset":2688
+			},
+			"IdleGameManager":{
+				"moduleAddress":4807312,
+				"moduleOffset":[
+					3248
+				],
+				"staticOffset":""
+			},
+			"is64":1,
+			"UserData":{
+				"moduleAddress":4835272,
+				"moduleOffset":[
+					64
+				],
+				"staticOffset":3376
+			},
+			"UserStatHandler":{
+				"moduleAddress":4816360,
+				"moduleOffset":[
+					1024,
+					2048,
+					184
+				],
+				"staticOffset":0
+			}
 		},
 		"474.1":{
 			"CrusadersGameDataSet":{
@@ -553,7 +842,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		}
 	},
 	"Kartridge":{
@@ -594,7 +893,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"478":{
 			"CrusadersGameDataSet":{
@@ -633,7 +942,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"503":{
 			"CrusadersGameDataSet":{
@@ -672,7 +991,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"507":{
 			"CrusadersGameDataSet":{
@@ -711,7 +1040,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"508":{
 			"CrusadersGameDataSet":{
@@ -750,7 +1089,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		}
 	},
 	"Steam":{
@@ -791,7 +1140,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"480":{
 			"CrusadersGameDataSet":{
@@ -830,7 +1189,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"496":{
 			"CrusadersGameDataSet":{
@@ -869,7 +1238,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"498":{
 			"CrusadersGameDataSet":{
@@ -908,7 +1287,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"500":{
 			"CrusadersGameDataSet":{
@@ -947,7 +1336,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"504":{
 			"CrusadersGameDataSet":{
@@ -986,7 +1385,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"508":{
 			"CrusadersGameDataSet":{
@@ -1025,7 +1434,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"521":{
 			"CrusadersGameDataSet":{
@@ -1064,7 +1483,225 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
+		},
+		"523":{
+			"CrusadersGameDataSet":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					56,
+					3664
+				],
+				"staticOffset":""
+			},
+			"DialogManager":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					2480
+				],
+				"staticOffset":""
+			},
+			"EngineSettings":{
+				"moduleAddress":4879992,
+				"moduleOffset":[
+					672
+				],
+				"staticOffset":3936
+			},
+			"GameSettings":{
+				"moduleAddress":4816448,
+				"moduleOffset":[
+					2080
+				],
+				"staticOffset":2688
+			},
+			"IdleGameManager":{
+				"moduleAddress":4807312,
+				"moduleOffset":[
+					3248
+				],
+				"staticOffset":""
+			},
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
+		},
+		"533":{
+			"CrusadersGameDataSet":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					56,
+					3664
+				],
+				"staticOffset":""
+			},
+			"DialogManager":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					2496
+				],
+				"staticOffset":""
+			},
+			"EngineSettings":{
+				"moduleAddress":4879992,
+				"moduleOffset":[
+					672
+				],
+				"staticOffset":3936
+			},
+			"GameSettings":{
+				"moduleAddress":4816448,
+				"moduleOffset":[
+					2080
+				],
+				"staticOffset":2688
+			},
+			"IdleGameManager":{
+				"moduleAddress":4807312,
+				"moduleOffset":[
+					3248
+				],
+				"staticOffset":""
+			},
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
+		},
+		"544":{
+			"CrusadersGameDataSet":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					56,
+					3664
+				],
+				"staticOffset":""
+			},
+			"DialogManager":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					2512
+				],
+				"staticOffset":""
+			},
+			"EngineSettings":{
+				"moduleAddress":4879992,
+				"moduleOffset":[
+					672
+				],
+				"staticOffset":3936
+			},
+			"GameSettings":{
+				"moduleAddress":4816448,
+				"moduleOffset":[
+					2080
+				],
+				"staticOffset":2688
+			},
+			"IdleGameManager":{
+				"moduleAddress":4807312,
+				"moduleOffset":[
+					3248
+				],
+				"staticOffset":""
+			},
+			"is64":1,
+			"UserData":{
+				"moduleAddress":4835272,
+				"moduleOffset":[
+					64
+				],
+				"staticOffset":3376
+			},
+			"UserStatHandler":{
+				"moduleAddress":4816360,
+				"moduleOffset":[
+					1024,
+					2048,
+					184
+				],
+				"staticOffset":0
+			}
+		},
+		"546":{
+			"CrusadersGameDataSet":{
+				"moduleAddress":4835272,
+				"moduleOffset":[
+					64,
+					3248
+				],
+				"staticOffset":""
+			},
+			"DialogManager":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					2480
+				],
+				"staticOffset":""
+			},
+			"EngineSettings":{
+				"moduleAddress":4879992,
+				"moduleOffset":[
+					672
+				],
+				"staticOffset":3936
+			},
+			"GameSettings":{
+				"moduleAddress":4816448,
+				"moduleOffset":[
+					2080
+				],
+				"staticOffset":2688
+			},
+			"IdleGameManager":{
+				"moduleAddress":4807312,
+				"moduleOffset":[
+					3248
+				],
+				"staticOffset":""
+			},
+			"is64":1,
+			"UserData":{
+				"moduleAddress":4835272,
+				"moduleOffset":[
+					64
+				],
+				"staticOffset":3376
+			},
+			"UserStatHandler":{
+				"moduleAddress":4816360,
+				"moduleOffset":[
+					1024,
+					2048,
+					184
+				],
+				"staticOffset":0
+			}
 		},
 		"464.1":{
 			"CrusadersGameDataSet":{
@@ -1103,7 +1740,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"474.1":{
 			"CrusadersGameDataSet":{
@@ -1142,7 +1789,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"504-DM-Alt":{
 			"CrusadersGameDataSet":{
@@ -1181,7 +1838,17 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		},
 		"508-DM-Alt":{
 			"CrusadersGameDataSet":{
@@ -1220,7 +1887,66 @@
 				],
 				"staticOffset":""
 			},
-			"is64":1
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
+		},
+		"533.1":{
+			"CrusadersGameDataSet":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					56,
+					3664
+				],
+				"staticOffset":""
+			},
+			"DialogManager":{
+				"moduleAddress":4824176,
+				"moduleOffset":[
+					2512
+				],
+				"staticOffset":""
+			},
+			"EngineSettings":{
+				"moduleAddress":4879992,
+				"moduleOffset":[
+					672
+				],
+				"staticOffset":3936
+			},
+			"GameSettings":{
+				"moduleAddress":4816448,
+				"moduleOffset":[
+					2080
+				],
+				"staticOffset":2688
+			},
+			"IdleGameManager":{
+				"moduleAddress":4807312,
+				"moduleOffset":[
+					3248
+				],
+				"staticOffset":""
+			},
+			"is64":1,
+			"UserData":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			},
+			"UserStatHandler":{
+				"moduleAddress":"",
+				"moduleOffset":"",
+				"staticOffset":""
+			}
 		}
 	}
 }

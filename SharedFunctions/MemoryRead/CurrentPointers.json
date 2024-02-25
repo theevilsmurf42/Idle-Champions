@@ -1,9 +1,9 @@
 {
 	"CrusadersGameDataSet":{
-		"moduleAddress":4824176,
+		"moduleAddress":4835272,
 		"moduleOffset":[
-			56,
-			3664
+			64,
+			3248
 		],
 		"staticOffset":""
 	},
@@ -37,5 +37,21 @@
 	},
 	"is64":1,
 	"Platform":"Steam",
-	"Version":"508-DM-Alt"
+	"UserData":{
+		"moduleAddress":4835272,
+		"moduleOffset":[
+			64
+		],
+		"staticOffset":3376
+	},
+	"UserStatHandler":{
+		"moduleAddress":4816360,
+		"moduleOffset":[
+			1024,
+			2048,
+			184
+		],
+		"staticOffset":0
+	},
+	"Version":546
 }

@@ -14,6 +14,7 @@
 */
 
 ; json library must be included if this file is used outside of Script Hub
+#include %A_LineFile%\..\..\SharedFunctions\json.ahk
 
 class IC_ServerCalls_Class
 {
@@ -41,7 +42,7 @@ class IC_ServerCalls_Class
 
     GetVersion()
     {
-        return "v2.4.1, 2023-06-14"
+        return "v2.4.2, 2023-08-22"
     }
 
     UpdateDummyData()
@@ -58,7 +59,7 @@ class IC_ServerCalls_Class
     ;Various server call functions that should be pretty obvious.
     ;============================================================
     ;Except this one, it is used internally and shouldn't be called directly.
-    ServerCall( callName, parameters, timeout := "" ) 
+    ServerCall( callName, parameters, timeout := "", retryNum := 0) 
     {
         response := ""
         URLtoCall := this.webRoot . "post.php?call=" . callName . parameters
@@ -80,7 +81,10 @@ class IC_ServerCalls_Class
                 response := JSON.parse(data)
                 if(!(response.switch_play_server == ""))
                 {
-                    return this.ServerCall( callName, parameters, timeoutVal ) 
+                    retryNum += 1
+                    this.WebRoot := response.switch_play_server
+                    if(retryNum <= 3) 
+                        return this.ServerCall( callName, parameters, timeoutVal, retryNum )
                 }
             }
             ;catch "Failed to fetch valid JSON response from server."
@@ -196,7 +200,7 @@ class IC_ServerCalls_Class
     }
     
     ; Special server call spcifically for use with saves. saveBody must be encoded before using this call.
-    ServerCallSave( saveBody ) 
+    ServerCallSave( saveBody, retryNum := 0 ) 
     {
         response := ""
         URLtoCall := this.webroot . "post.php?call=saveuserdetails&"
@@ -221,7 +225,10 @@ class IC_ServerCalls_Class
                 response := JSON.parse(data)
                 if(!(response.switch_play_server == ""))
                 {
-                    return this.ServerCallSave( saveBody ) 
+                    retryNum += 1
+                    this.WebRoot := response.switch_play_server
+                    if(retryNum <= 3) 
+                        return this.ServerCallSave( saveBody, retryNum ) 
                 }
             }
             ;catch "Failed to fetch valid JSON response from server."
@@ -311,4 +318,43 @@ class IC_ServerCalls_Class
         OutputDebug, % "Server Suggested web root is: " . suggestedServer
     }
     #include  *i IC_ServerCalls_Class_Extra.ahk
+}
+
+class Byteglow_ServerCalls_Class
+{
+    webRoot := "https://ic.byteglow.com/api/"
+    timeoutVal := 60000
+    ServerCall( callName, parameters, timeout := "" ) 
+    {
+
+        response := ""
+        URLtoCall := this.webRoot . callName . "?" . parameters
+        timeout := timeout ? timeout : this.timeoutVal
+        WR := ComObjCreate( "WinHttp.WinHttpRequest.5.1" )
+        WR.SetTimeouts( 0, 45000, 30000, timeout )
+        Try {
+            WR.Open( "POST", URLtoCall, true )
+            WR.SetRequestHeader( "Content-Type","application/x-www-form-urlencoded" )
+            WR.Send()
+            WR.WaitForResponse( -1 )
+            data := WR.ResponseText
+            Try
+            {
+                response := JSON.parse(data)
+            }
+            ;catch "Failed to fetch valid JSON response from server."
+        }
+        catch exception {
+			return exception
+		}
+        return response
+    }
+
+    ; https://ic.byteglow.com/api/briv-stacks?gild=2&enchant=60009&rarity=4&metalborn=1&target=2000
+    ; https://ic.byteglow.com/api/briv-stacks?skips=11&metalborn=1&target=2000
+    CallBrivStacks(gild, ilvls, rarity, isMetalborn, modronReset) 
+    {
+        params := "gild=" . gild . "&enchant=" . ilvls . "&rarity=" . rarity . "&metalborn=" . isMetalborn . "&target=" . modronReset
+        return this.ServerCall( "briv-stacks", params)
+    }    
 }

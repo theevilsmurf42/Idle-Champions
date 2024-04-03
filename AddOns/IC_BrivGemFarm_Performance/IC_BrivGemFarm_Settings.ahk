@@ -15,7 +15,7 @@ ReloadBrivGemFarmSettings(loadFromFile := True)
     if ( g_BrivUserSettings[ "StackZone" ] == "" )
         g_BrivUserSettings[ "StackZone" ] := 700
     if (g_BrivUserSettings[ "TargetStacks" ] == "")
-        g_BrivUserSettings[ "TargetStacks" ] := 4000
+        g_BrivUserSettings[ "TargetStacks" ] := 0
     if ( g_BrivUserSettings[ "RestartStackTime" ] == "" )
         g_BrivUserSettings[ "RestartStackTime" ] := 12000
     if ( g_BrivUserSettings[ "BuySilvers" ] == "" )
@@ -52,20 +52,24 @@ ReloadBrivGemFarmSettings(loadFromFile := True)
         g_BrivUserSettings[ "DoChestsContinuous" ] := 0
     if ( g_BrivUserSettings[ "ResetZoneBuffer" ] == "" )
         g_BrivUserSettings[ "ResetZoneBuffer" ] := 41
+    if (g_BrivUserSettings[ "IgnoreBrivHaste" ] == "" )
+        g_BrivUserSettings[ "IgnoreBrivHaste" ] := 0
     if ( g_BrivUserSettings[ "MinStackZone" ] == "" )
         g_BrivUserSettings[ "MinStackZone" ] := 200
     if ( g_BrivUserSettings[ "ForceOfflineGemThreshold" ] == "" )
         g_BrivUserSettings[ "ForceOfflineGemThreshold" ] := 0
     if ( g_BrivUserSettings[ "ForceOfflineRunThreshold" ] == "" )
         g_BrivUserSettings[ "ForceOfflineRunThreshold" ] := 0
+    if ( g_BrivUserSettings[ "ManualBrivJumpValue" ] == "" )
+        g_BrivUserSettings[ "ManualBrivJumpValue" ] := 0
     if ( g_BrivUserSettings[ "BrivJumpBuffer" ] == "" )
         g_BrivUserSettings[ "BrivJumpBuffer" ] := 0
     if ( g_BrivUserSettings[ "DisableDashWait" ] == "" )
         g_BrivUserSettings[ "DisableDashWait" ] := false
     if ( g_BrivUserSettings[ "RestoreLastWindowOnGameOpen" ] == "" )
-        g_BrivUserSettings[ "RestoreLastWindowOnGameOpen" ] := false
+        g_BrivUserSettings[ "RestoreLastWindowOnGameOpen" ] := true
     if ( g_BrivUserSettings[ "AutoCalculateBrivStacks" ] == "" )
-        g_BrivUserSettings[ "AutoCalculateBrivStacks" ] := true
+        g_BrivUserSettings[ "AutoCalculateBrivStacks" ] := False
     if (g_BrivUserSettings[ "AutoCalculateWorstCase" ] == "" )
         g_BrivUserSettings[ "AutoCalculateWorstCase" ] := true
     if ( g_BrivUserSettings[ "PreferredBrivJumpZones" ] == "")

@@ -30,6 +30,7 @@ Gui, ICScriptHub:Add, Text, vInventoryViewTimeStampID x15 y+15 w455, % "Last Upd
 
 GUIFunctions.UseThemeTextColor("TableTextColor")
 Gui, ICScriptHub:Add, ListView, x15 y+5 w450 h450 vInventoryViewID, `ID|Name|Amount|Change|Per `Run
+;Gui, ICScriptHub:Add, ListView, x15 y+5 w450 h450 vInventoryViewID, `ID|Name|Index|Index Calculated|---
 GUIFunctions.UseThemeListViewBackgroundColor("InventoryViewID")
 g_SF.Memory.InitializeChestsIndices()
 
@@ -41,6 +42,7 @@ g_SF.Memory.InitializeChestsIndices()
 class IC_InventoryView_Component
 {
     FirstReadValues := ""
+    SanitySize := 5000 ; sanity check - SanitySize ensures a bad pointer does cause the addon to attempt to read billions of chests. Currently there are about 150-200 champions, 600 chests, and likely < 100 other inventory items. 5000 should allow years of growth.
     ; ReadInventory reads the inventory from in game and displays it in a list. Remembers first run values to compare for changes and per run calculations.
     ReadInventory(runCount := 1, doAddToFirstRead := false)
     {  
@@ -50,6 +52,8 @@ class IC_InventoryView_Component
             doAddToFirstRead := true
         }
         size := g_SF.Memory.ReadInventoryItemsCount()
+        if (size < 0 OR size > this.SanitySize)
+            return
         loop, %size%
         {
             change := ""
@@ -74,6 +78,25 @@ class IC_InventoryView_Component
         this.FirstReadBuffValues := ""
         this.FirstReadChestValues := ""
         this.ReadCombinedInventory(1)
+        ;this.ReadChampionList()
+    }
+
+    ; Populates listbox with the full list of champions, their IDs, the index in the list they are, and the index of the champ when the index is expected to be the same as their ID.
+    ReadChampionList()
+    {
+        LV_Delete()
+        Gui, Submit, NoHide
+        size := g_SF.Memory.ReadChampListSize() + 2
+        if(size < 0 OR size > this.SanitySize)
+            return "" 
+        loop, %size%
+        {
+            champName := g_SF.Memory.ReadChampNameByID(A_Index)
+            champListIndex := A_Index - 1
+            champIndexCalculated := g_SF.Memory.GetHeroHandlerIndexByChampID(A_Index)
+            champIDAtIndex := g_SF.Memory.ReadChampIDByIndex(g_SF.Memory.GetHeroHandlerIndexByChampID(A_Index))
+            LV_Add(, champIDAtIndex, champName, champListIndex, champIndexCalculated, "---")
+        }
     }
 
     ; Loads settings from the addon's setting.json file.
@@ -123,7 +146,7 @@ class IC_InventoryView_Component
             doAddToFirstRead := true
         }
         size := g_SF.Memory.ReadInventoryChestListSize()
-        if(!size)
+        if(size < 0 OR size > this.SanitySize)
             return "" 
         loop, %size%
         {
